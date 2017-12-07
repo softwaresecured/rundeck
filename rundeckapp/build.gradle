@@ -453,7 +453,7 @@ task findSecurityBugs(type: FindBugs) {
         toolVersion = "3.0.1"
         sourceSets = [sourceSets.main]
         ignoreFailures = true
-        reportsDir = file("$project.buildDir/findbugsReports")
+        reportsDir = file("$project.buildDir/target")
         effort = "max"
         reportLevel = "low"
     }
