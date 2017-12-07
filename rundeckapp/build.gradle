@@ -436,8 +436,9 @@ uploadArchives {
 
 tasks.withType(FindBugs) {
     reports {
-        xml.enabled true
         html.enabled false
+        xml.enabled true
+        xml.withMessages true
     }
 }
 
