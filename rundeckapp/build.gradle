@@ -41,7 +41,7 @@ apply plugin: 'idea'
 apply plugin: 'maven'
 apply plugin: 'signing'
 apply plugin: 'com.google.osdetector'
-apply plugin: "findbugs"
+apply plugin: 'findbugs'
 
 // set the convention to rundeck:<branch>:<path>:<projectName>
 eclipse.project.name =  "${project.getParent().eclipse.project.name}:webapp"
@@ -457,3 +457,4 @@ task findSecurityBugs(type: FindBugs) {
         effort = "max"
         reportLevel = "low"
     }
+}
