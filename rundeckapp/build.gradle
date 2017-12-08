@@ -79,11 +79,6 @@ allprojects {
     }
 }
 dependencies {
-    // Dependencies for FindBugs and FindBugs plugins
-    findbugs 'com.google.code.findbugs:findbugs:3.0.1'
-    findbugs configurations.findbugsPlugins.dependencies
-    findbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.7.1'
-
     pluginFiles project(':plugins:script-plugin'),
             project(':plugins:stub-plugin'),
             project(':plugins:localexec-plugin'),
@@ -97,6 +92,35 @@ dependencies {
             project(':plugins:upvar-plugin'),
             "com.github.Batix:rundeck-ansible-plugin:2.0.2",
             "com.github.rundeck-plugins:aws-s3-model-source:v1.0"
+    findbugs 'com.google.code.findbugs:findbugs:3.0.1'
+    findbugs configurations.findbugsPlugins.dependencies
+    findbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.7.1'
+}
+
+tasks.withType(FindBugs) {
+    reports {
+        xml.enabled true
+        xml.withMessages true
+        html.enabled false
+    }
+}
+
+// FindBugs task that load security rules only
+task findSecurityBugs(type: FindBugs) {
+
+    classes = fileTree(project.rootDir.absolutePath).include("**/*.class");
+    source = fileTree(project.rootDir.absolutePath).include("**/*.groovy");
+    classpath = files()
+    pluginClasspath = project.configurations.findbugsPlugins
+
+    findbugs {
+        toolVersion = "3.0.1"
+        sourceSets = [sourceSets.main]
+        ignoreFailures = true
+        reportsDir = file("$project.buildDir/target")
+        effort = "max"
+        reportLevel = "low"
+    }
 }
 
 task('copyPluginLibs').dependsOn(configurations.pluginFiles).doLast {
@@ -211,14 +235,12 @@ task('installDependencies').dependsOn(projDeps).doLast {
 
 /**
  * Installs the jetty-plugin into the .grails folder
-
 task installJettyPlugin(type: Exec, dependsOn: [extractGrails]) {
     def jettyPluginVersion = '2.0.3'
     def jettyPluginInstalled = "${System.properties['user.home']}/.grails/${grailsVersion}/projects/rundeckapp/plugins/jetty-${jettyPluginVersion}"
     
     inputs.dir file(grailsHome)
     outputs.dir file(jettyPluginInstalled)
-
     workingDir project.projectDir
     environment 'GRAILS_HOME', grailsHome
     commandLine grailsCommandLine()
@@ -231,7 +253,6 @@ task installJettyPlugin(type: Exec, dependsOn: [extractGrails]) {
             'jetty',
             jettyPluginVersion
 }
-
  */
 
 task cleanWar(type: Delete) {
@@ -431,31 +452,5 @@ uploadArchives {
             }
             pom=deploypom
         }
-    }
-}
-
-tasks.withType(FindBugs) {
-    reports {
-        html.enabled false
-        xml.enabled true
-        xml.withMessages true
-    }
-}
-
-// FindBugs task that load security rules only
-task findSecurityBugs(type: FindBugs) {
-
-    classes = fileTree(project.rootDir.absolutePath).include("**/*.class");
-    source = fileTree(project.rootDir.absolutePath).include("**/*.groovy");
-    classpath = files()
-    pluginClasspath = project.configurations.findbugsPlugins
-
-    findbugs {
-        toolVersion = "3.0.1"
-        sourceSets = [sourceSets.main]
-        ignoreFailures = true
-        reportsDir = file("$project.buildDir/target")
-        effort = "max"
-        reportLevel = "low"
     }
 }
